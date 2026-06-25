@@ -1,0 +1,6 @@
+{
+  "name": "Logiacademy Eğitmen Paneli",
+  "description": "Logiacademy eğitmenleri için ders yönetimi, yoklama takibi, müfredat planlaması ve kaynak kütüphanesi içeren gelişmiş yönetim paneli.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Student in the system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "avatarInitials": { "type": "string" }
+      },
+      "required": ["id", "name", "avatarInitials"]
+    },
+    "CourseModule": {
+      "title": "CourseModule",
+      "description": "Course module details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["Zorunlu", "Seçmeli"] },
+        "icon": { "type": "string", "enum": ["code", "database", "brush", "school", "extension"] },
+        "progress": { "type": "number" },
+        "weeks": { "type": "array" }
+      },
+      "required": ["id", "title", "description", "type", "icon", "progress", "weeks"]
+    },
+    "LessonSchedule": {
+      "title": "LessonSchedule",
+      "description": "Lesson schedule and details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "time": { "type": "string" },
+        "endTime": { "type": "string" },
+        "title": { "type": "string" },
+        "location": { "type": "string" },
+        "studentsCount": { "type": "number" },
+        "borderClass": { "type": "string" },
+        "badge": { "type": "string" }
+      },
+      "required": ["id", "time", "endTime", "title", "location", "studentsCount", "borderClass"]
+    },
+    "RecentTopic": {
+      "title": "RecentTopic",
+      "description": "Recent topic document or quiz",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "course": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "icon": { "type": "string" },
+        "type": { "type": "string", "enum": ["document", "quiz", "video"] },
+        "content": { "type": "string" }
+      },
+      "required": ["id", "title", "course", "updatedAt", "icon", "type"]
+    },
+    "ResourceItem": {
+      "title": "ResourceItem",
+      "description": "Educational resource details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string", "enum": ["Öğretim Kılavuzları", "Öğrenci Notları", "Harici Araçlar"] },
+        "type": { "type": "string", "enum": ["Video", "PDF", "Web Sitesi", "DOCX"] },
+        "durationOrPages": { "type": "string" },
+        "fileSizeOrUrl": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "icon": { "type": "string" }
+      },
+      "required": ["id", "title", "description", "category", "type", "durationOrPages", "fileSizeOrUrl", "icon"]
+    },
+    "Instructor": {
+      "title": "Instructor",
+      "description": "Instructor profile and assignments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "department": { "type": "string" },
+        "email": { "type": "string" },
+        "assignedSchools": { "type": "array" },
+        "assignedCourses": { "type": "array" }
+      },
+      "required": ["id", "name", "title", "department", "email", "assignedSchools", "assignedCourses"]
+    },
+    "School": {
+      "title": "School",
+      "description": "School details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "location": { "type": "string" }
+      },
+      "required": ["id", "name", "location"]
+    },
+    "AttendanceSession": {
+      "title": "AttendanceSession",
+      "description": "Saves student attendances for a scheduled class",
+      "type": "object",
+      "properties": {
+        "lessonId": { "type": "string" },
+        "lessonTitle": { "type": "string" },
+        "date": { "type": "string" },
+        "records": { "type": "array" }
+      },
+      "required": ["lessonId", "lessonTitle", "date", "records"]
+    },
+    "SystemSetting": {
+      "title": "SystemSetting",
+      "description": "System settings and instructor metadata",
+      "type": "object",
+      "properties": {
+        "instructorName": { "type": "string" },
+        "title": { "type": "string" },
+        "department": { "type": "string" }
+      },
+      "required": ["instructorName"]
+    }
+  },
+  "firestore": {
+    "students": {
+      "schema": "Student",
+      "description": "Collection of students"
+    },
+    "courses": {
+      "schema": "CourseModule",
+      "description": "Collection of courses/modules"
+    },
+    "schedule": {
+      "schema": "LessonSchedule",
+      "description": "Weekly class scheduling"
+    },
+    "recentTopics": {
+      "schema": "RecentTopic",
+      "description": "Board for recent topics"
+    },
+    "resources": {
+      "schema": "ResourceItem",
+      "description": "Educational resource assets"
+    },
+    "instructors": {
+      "schema": "Instructor",
+      "description": "Instructor roster"
+    },
+    "schools": {
+      "schema": "School",
+      "description": "Schools catalog"
+    },
+    "attendances": {
+      "schema": "AttendanceSession",
+      "description": "Attendance logs"
+    },
+    "settings": {
+      "schema": "SystemSetting",
+      "description": "General settings metadata"
+    }
+  }
+}

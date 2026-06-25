@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Vibrant Palette Color Scheme */
+  --color-primary: #1E293B;
+  --color-primary-container: #F0F4F8;
+  --color-on-primary-container: #1b1662;
+  --color-secondary: #FF7E5F;
+  --color-secondary-container: #FFF0EB;
+  --color-on-secondary-container: #5e1c0c;
+  --color-accent-peach: #FEB47B;
+  --color-dark-slate: #1A1C1E;
+  
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #FFF5EC;
+  --color-on-surface: #1A1C1E;
+  --color-on-surface-variant: #5A5D6B;
+  --color-outline: #8E90A0;
+  --color-outline-variant: #E1E2EC;
+
+  /* Custom Paddings and Spacing */
+  --spacing-stack-sm: 12px;
+  --spacing-stack-md: 20px;
+  --spacing-stack-lg: 32px;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-[#FFF9F2] text-[#1A1C1E];
+  }
+}
+
+

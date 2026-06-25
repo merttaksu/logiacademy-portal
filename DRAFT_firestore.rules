@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && (
+        request.auth.token.email_verified == true || 
+        request.auth.providerId == 'google.com'
+      );
+    }
+
+    function isInstructor() {
+      return isEmailVerified() && (
+        request.auth.token.email == "mertaksu15.MA@gmail.com" ||
+        exists(/databases/$(database)/documents/instructors/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity validation functions
+    function isValidStudent(data) {
+      return data.keys().hasAll(['id', 'name', 'avatarInitials']) &&
+             data.keys().size() == 3 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 128 &&
+             data.avatarInitials is string && data.avatarInitials.size() <= 5;
+    }
+
+    function isValidCourseModule(data) {
+      return data.keys().hasAll(['id', 'title', 'description', 'type', 'icon', 'progress', 'weeks']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 1000 &&
+             data.type in ['Zorunlu', 'Seçmeli'] &&
+             data.icon in ['code', 'database', 'brush', 'school', 'extension'] &&
+             data.progress is number && data.progress >= 0 && data.progress <= 100 &&
+             data.weeks is list && data.weeks.size() <= 52;
+    }
+
+    function isValidLessonSchedule(data) {
+      return data.keys().hasAll(['id', 'time', 'endTime', 'title', 'location', 'studentsCount', 'borderClass']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.time is string && data.time.size() <= 10 &&
+             data.endTime is string && data.endTime.size() <= 10 &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.location is string && data.location.size() <= 200 &&
+             data.studentsCount is number && data.studentsCount >= 0 && data.studentsCount <= 10000 &&
+             data.borderClass is string && data.borderClass.size() <= 50;
+    }
+
+    // Match blocks for all collections
+    match /students/{studentId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(studentId) && isValidStudent(incoming());
+      allow delete: if isInstructor() && isValidId(studentId);
+    }
+
+    match /courses/{courseId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(courseId) && isValidCourseModule(incoming());
+      allow delete: if isInstructor() && isValidId(courseId);
+    }
+
+    match /schedule/{scheduleId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(scheduleId) && isValidLessonSchedule(incoming());
+      allow delete: if isInstructor() && isValidId(scheduleId);
+    }
+
+    match /recentTopics/{topicId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(topicId) &&
+             incoming().keys().hasAll(['id', 'title', 'course', 'updatedAt', 'icon', 'type']) &&
+             incoming().id is string && incoming().title is string && incoming().title.size() <= 200 &&
+             incoming().course is string && incoming().type in ['document', 'quiz', 'video'];
+      allow delete: if isInstructor() && isValidId(topicId);
+    }
+
+    match /resources/{resourceId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(resourceId) &&
+             incoming().keys().hasAll(['id', 'title', 'description', 'category', 'type', 'durationOrPages', 'fileSizeOrUrl', 'icon']) &&
+             incoming().id is string && incoming().title is string && incoming().title.size() <= 200 &&
+             incoming().category in ['Öğretim Kılavuzları', 'Öğrenci Notları', 'Harici Araçlar'] &&
+             incoming().type in ['Video', 'PDF', 'Web Sitesi', 'DOCX'];
+      allow delete: if isInstructor() && isValidId(resourceId);
+    }
+
+    match /instructors/{instructorId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(instructorId) &&
+             incoming().keys().hasAll(['id', 'name', 'title', 'department', 'email', 'assignedSchools', 'assignedCourses']) &&
+             incoming().id == instructorId && incoming().email is string;
+      allow delete: if isInstructor() && isValidId(instructorId);
+    }
+
+    match /schools/{schoolId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(schoolId) &&
+             incoming().keys().hasAll(['id', 'name', 'location']) &&
+             incoming().id == schoolId && incoming().name is string && incoming().name.size() <= 200;
+      allow delete: if isInstructor() && isValidId(schoolId);
+    }
+
+    match /attendances/{attendanceId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(attendanceId) &&
+             incoming().keys().hasAll(['lessonId', 'lessonTitle', 'date', 'records']) &&
+             incoming().lessonId is string && incoming().records is list;
+      allow delete: if isInstructor() && isValidId(attendanceId);
+    }
+
+    match /settings/{settingId} {
+      allow read: if isEmailVerified();
+      allow create, update: if isInstructor() && isValidId(settingId) &&
+             incoming().keys().hasAll(['instructorName']);
+      allow delete: if isInstructor() && isValidId(settingId);
+    }
+  }
+}
