@@ -10,7 +10,7 @@ import {
   getDocFromServer,
   writeBatch
 } from 'firebase/firestore';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User, getRedirectResult } from 'firebase/auth';
 import { db, auth, handleFirestoreError, OperationType, loginWithGoogle, logoutUser } from '../firebase';
 import { Student, CourseModule, LessonSchedule, RecentTopic, ResourceItem, Instructor, School } from '../types';
 import { 
@@ -133,6 +133,17 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Sync Auth
   useEffect(() => {
+    // Handle redirect result if page was reloaded after signInWithRedirect
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+        }
+      })
+      .catch((error) => {
+        console.error('Redirect sign-in error:', error);
+      });
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);

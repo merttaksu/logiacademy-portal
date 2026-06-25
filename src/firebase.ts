@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -60,11 +60,29 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 // Google Login Helper
 export async function loginWithGoogle() {
   try {
+    // Önce Popup yöntemini deneriz
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
-  } catch (error) {
-    console.error('Google Sign In Error:', error);
-    throw error;
+  } catch (error: any) {
+    console.warn('Google Sign In Popup Error, trying redirect fallback...', error);
+    
+    // Eğer popup engellendiyse veya tarayıcı kısıtlaması varsa Redirect yöntemini tetikleriz
+    if (
+      error?.code === 'auth/popup-blocked' || 
+      error?.code === 'auth/popup-closed-by-user' ||
+      error?.code === 'auth/cancelled-popup-request' ||
+      error?.message?.includes('popup') ||
+      error?.code === 'auth/internal-error'
+    ) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+      } catch (redirectError) {
+        console.error('Google Redirect Error:', redirectError);
+        throw redirectError;
+      }
+    } else {
+      throw error;
+    }
   }
 }
 
